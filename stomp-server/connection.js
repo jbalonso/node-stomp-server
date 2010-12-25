@@ -2,68 +2,73 @@
 // stomp-server/connection.js -- Definition of the Connection class
 
 // Load modules
-var events  = require('events'),
-    frame   = require('./frame');
+var events          = require('events'),
+    frame           = require('./frame'),
+    StringBuffer    = require('./stringbuffer').StringBuffer;
 
-function Connection( stream ) {
+function Connection( stream, bufferLimit ) {
     var self = this;
 
     // Extend EventEmitter
     events.EventEmitter.call(this);
 
+    // Set the buffer limit
+    if( bufferLimit == null )
+        bufferLimit = 65536;
+
     // Initialize members
     this._stream = stream;
-    this._buffer = "";
+    this._buf = new StringBuffer(bufferLimit);
     this.connected = false;
     this.secure = false;
-    this.bufferLimit = null;
+    this.bufferLimit = bufferLimit;
+    this.strict = false;
+
 
     // Configure basic event handlers
     this._stream.on('connect', function() { self.connected = true; self.emit('connect'); });
     this._stream.on('secure', function() { self.secure = true; } );
-    this._stream.on('error', function(exception) { self.emit('error', exception); });
     this._stream.on('timeout', function() { self._stream.end(); self.emit('timeout'); });
     this._stream.on('end', function() { self._stream.end(); });
     this._stream.on('close', function (had_error) {
             self.connected = false;
             self.emit('close', had_error);
         });
+    this._stream.on('error', function(exception) {
+            self.emit('error', exception);
+            if( self.strict ) self._stream.destroy();
+        });
 
     // Define the packet serializer
     this._stream.on('data', function(data) {
-            // Accumulate data in the buffer
-            self.buffer += data;
-            if( self.bufferLimit != null ) {
-                if( self.buffer.length > self.bufferLimit ) {
-                    // Close the connection
-                    self._stream.destroy();
-                    self.emit('error', 'Parse buffer overflow');
-                    return;
-                }
-            }
+            try {
+                // Accumulate data in the buffer
+                self._buf.write(data);
 
-            // Extract frames
-            var buffer = self.buffer;
-            do {
-                // Extract a single frame from the stream
-                var parse_pair = frame.fromBuffer(buffer);
-                var frame_obj = parse_pair[0];
-                buffer = parse_pair[1];
+                // Extract frames
+                var buffer = self._buf;
+                do {
+                    // Extract a single frame from the stream
+                    var frame_obj = frame.fromBuffer(buffer);
 
-                // Emit the frame, if any
-                if( frame_obj != null )
-                    self.emit('frame', frame_obj);
-            } while( frame_obj != null );
+                    // Emit the frame, if any
+                    if( frame_obj != null )
+                        self.emit('frame', frame_obj);
+                } while( frame_obj != null );
+            } catch( err ) {
+                // Emit an error
+                self.emit('error', err);
 
-            // Leave remainder as buffer
-            self.buffer = buffer;
+                // Close the connection if strict
+                if( self.strict ) self._stream.destroy();
+            };
         });
 
 }
 
 // Connection.send(frame_obj, cbk(err)
 Connection.prototype.send = function(frame_obj) {
-    this._stream.write(frame_obj.toString());
+    this._stream.write(frame_obj.toBuffer());
 };
 
 // Export classes
