@@ -54,12 +54,12 @@ ConnectionFactory.prototype._newConnection = function(stream) {
     conn.on('frame', function(frame_obj) {
             // Process frame for reception through middleware
             var layer, error_obj;
-            for( layer = 0; layer < this.recv_middleware.length; layer++ ) {
+            for( layer = 0; layer < self.recv_middleware.length; layer++ ) {
                 try {
-                    if( frame_obj && this.recv_middleware[layer].cbk )
-                        frame_obj = this.recv_middleware[layer].cbk.call(this, conn, frame_obj);
-                    else if( error_obj && this.recv_middleware[layer].ebk )
-                        frame_obj = this.recv_middleware[layer].ebk.call(this, conn, error_obj);
+                    if( frame_obj && self.recv_middleware[layer].cbk )
+                        frame_obj = self.recv_middleware[layer].cbk.call(self, conn, frame_obj);
+                    else if( error_obj && self.recv_middleware[layer].ebk )
+                        frame_obj = self.recv_middleware[layer].ebk.call(self, conn, error_obj);
                     error_obj = null;
                 } catch( err ) {
                     error_obj = err;
@@ -68,8 +68,8 @@ ConnectionFactory.prototype._newConnection = function(stream) {
             }
 
             // Handle remains
-            if( frame_obj ) this.emit('frame', conn, frame_obj);
-            else if( error_obj ) this.emit('error', error_obj);
+            if( frame_obj ) self.emit('frame', conn, frame_obj);
+            else if( error_obj ) self.emit('error', error_obj);
         });
 };
 
