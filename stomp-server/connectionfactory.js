@@ -35,7 +35,7 @@ function ConnectionFactory(bufferLimit) {
 }
 sys.inherits(ConnectionFactory, events.EventEmitter);
 
-ConnectionFactory.prototype._newConnection = function() {
+ConnectionFactory.prototype._newConnection = function(stream) {
     var self = this;
 
     // Construct a new Connection object
