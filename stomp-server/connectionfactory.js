@@ -50,7 +50,7 @@ ConnectionFactory.prototype._newConnection = function(stream) {
     conn.on('secure', function() { self.emit('secure', conn); });
     conn.on('timeout', function() { self.emit('timeout', conn); });
     conn.on('close', function(had_error) { self.emit('close', conn, had_error); });
-    conn.on('error', function(err) { self.emit('error', conn, err); });
+    conn.on('error', function(err) { console.log(err); console.log(err.stack); self.emit('error', conn, err); });
     conn.on('frame', function(frame_obj) {
             // Process frame for reception through middleware
             var layer, error_obj;
