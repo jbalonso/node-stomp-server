@@ -78,6 +78,7 @@ function fromBuffer(buffer) {
 
             // Save the header data
             headers[match[1]] = match[2];
+        }
     } while(line != '');
 
     // Parse content-length header

@@ -17,7 +17,7 @@ function ProtocolError(conn, frame_obj, description) {
 
 function DefaultError(conn, error_obj) {
     // Construct an ERROR frame
-    var frame_obj = new frame.Frame('ERROR', null, error_obj.toString()):
+    var frame_obj = new frame.Frame('ERROR', null, error_obj.toString());
     
     // Send the ERROR frame
     this.send_frame(conn, frame_obj);
