@@ -1,6 +1,9 @@
 
 // stomp-server/middleware.js -- Basic broker middleware
 
+// Load modules
+var frame = require('./frame');
+
 function InvalidFrameError(conn, frame_obj, description) {
     Error.call(this, 'Invalid frame: ' + description );
     this.conn = conn;
