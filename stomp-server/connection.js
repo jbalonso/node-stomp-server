@@ -43,7 +43,7 @@ function Connection( stream, bufferLimit ) {
     this._stream.on('data', function(data) {
             try {
                 // Accumulate data in the buffer
-                self._buf.write(data);
+                self._buf.write(data.toString('utf8'));
 
                 // Extract frames
                 var buffer = self._buf;
