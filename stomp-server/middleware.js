@@ -78,6 +78,7 @@ function ConnectRecv(conn, frame_obj) {
     if( !conn.connected ) {
         if( frame_obj.cmd != 'CONNECT' )
             throw new ProtocolError(conn, frame_obj, 'Client must CONNECT');
+        
         // Automatically accept the client
         this.send_frame(
                 conn,
