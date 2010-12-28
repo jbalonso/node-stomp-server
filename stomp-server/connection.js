@@ -25,9 +25,8 @@ function Connection( stream, bufferLimit ) {
     this.bufferLimit = bufferLimit;
     this.strict = false;
 
-
     // Configure basic event handlers
-    this._stream.on('connect', function() { self.connected = true; self.emit('connect'); });
+    this._stream.on('connect', function() { self.emit('connect'); });
     this._stream.on('secure', function() { self.secure = true; self.emit('secure');} );
     this._stream.on('timeout', function() { self._stream.end(); self.emit('timeout'); });
     this._stream.on('end', function() { self._stream.end(); });
