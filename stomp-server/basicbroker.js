@@ -209,11 +209,15 @@ function SendRecvCurry(broker) {
             var subscr = dst.subscriptions[i];
             var headers = filterHeaders(frame_obj.headers);
 
+        // FIXME: This try/catch block patches the fact that subscriptions are
+        // not cleared for dropped/closed connections
+        try{
             // Transmit a MESSAGE frame
             var frame_out = new Frame('MESSAGE', headers, frame_obj.body);
             if( subscr.id )
                 frame_out.headers.id = subscr.id;
             broker._cf.send_frame(subscr.conn, frame_out);
+        }catch( err ) { console.log(err.stack); }
         }
 
         // Operation Complete!
