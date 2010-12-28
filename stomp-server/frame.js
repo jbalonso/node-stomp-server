@@ -41,6 +41,7 @@ Frame.prototype.toBuffer = function() {
     // Add the headers
     for( var key in this.headers )
         buffer += key + ": " + this.headers[key] + '\n';
+    buffer += '\n';
 
     // Add the body
     if( this.body != null )
