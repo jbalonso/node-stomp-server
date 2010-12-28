@@ -44,7 +44,7 @@ Frame.prototype.toBuffer = function() {
 
     // Add the body
     if( this.body != null )
-        buffer += body;
+        buffer += this.body;
 
     // End the frame
     buffer += "\0";
@@ -67,7 +67,7 @@ function fromBuffer(buffer) {
     var rex = /^([^:]+):\ *(.+)$/;
     do {
         // Extract a line
-        line = cmd.peekLine('\n');
+        line = buffer.peekLine('\n');
         if( line == null ) {
             buffer.abortRead();
             return null;
@@ -123,4 +123,4 @@ function fromBuffer(buffer) {
 
 // Export classes
 module.exports.Frame = Frame;
-
+module.exports.fromBuffer = fromBuffer;
