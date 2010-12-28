@@ -15,7 +15,20 @@ function ProtocolError(conn, frame_obj, description) {
     this.description = description;
 }
 
+function Debug(conn, frame_obj) {
+    console.log(frame_obj.cmd
+                + ' '
+                + JSON.stringify(frame_obj.headers)
+                + ' '
+                + JSON.stringify(frame_obj.body)
+                + '\r');
+    return frame_obj;
+}
+
 function DefaultError(conn, error_obj) {
+    // Log error
+    console.log('error: ' + error_obj.toString() + '\r\n');
+
     // Construct an ERROR frame
     var frame_obj = new frame.Frame('ERROR', null, error_obj.toString());
     
@@ -93,3 +106,4 @@ module.exports.DefaultError = DefaultError;
 module.exports.ValidRecvFrame = ValidRecvFrame;
 module.exports.ValidSendFrame = ValidSendFrame;
 module.exports.ConnectRecv = ConnectRecv;
+module.exports.Debug = Debug;
