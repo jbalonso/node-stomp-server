@@ -66,7 +66,7 @@ function ConnectRecv(conn, frame_obj) {
                 conn,
                 new frame.Frame('CONNECTED', {session: conn._id}));
         conn.connected = true;
-        return null;
+        frame_obj.handled = true;
     }
 
     // Operation Complete!

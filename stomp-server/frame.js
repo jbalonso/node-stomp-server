@@ -13,6 +13,7 @@ function Frame( cmd, headers, body ) {
     this.cmd = cmd;
     this.headers = {};
     this.body = body;
+    this.handled = false;
 
     // Load headers
     if( headers != null )
