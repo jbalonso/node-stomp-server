@@ -65,7 +65,7 @@ function fromBuffer(buffer) {
     // Extract headers
     var headers = {};
     var line = '';
-    var rex = /^([^:]+):\ *(.+)$/;
+    var rex = /^([^:]+):\ *(.*)$/;
     do {
         // Extract a line
         line = buffer.peekLine('\n');
