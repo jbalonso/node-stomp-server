@@ -9,6 +9,9 @@ function MalformedFrameError(description) {
 function Frame( cmd, headers, body ) {
     var self = this;
 
+    // Handle defaults
+    if( body == null ) body = '';
+
     // Initialize members
     this.cmd = cmd;
     this.headers = {};
