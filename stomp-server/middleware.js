@@ -49,6 +49,7 @@ function ValidRecvFrame(conn, frame_obj) {
         case 'ABORT':
         case 'ACK':
         case 'DISCONNECT':
+        case 'SEND':
             return frame_obj;
             break;
         default:
