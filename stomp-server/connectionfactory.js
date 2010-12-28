@@ -82,6 +82,7 @@ ConnectionFactory.prototype.send_frame = function(conn, frame_obj) {
                 frame_obj = this.send_middleware[layer].cbk.call(this, conn, frame_obj);
             else if( error_obj && this.send_middleware[layer].ebk )
                 frame_obj = this.send_middleware[layer].ebk.call(this, conn, error_obj);
+            error_obj = null;
         } catch( err ) {
             error_obj = err;
             frame_obj = null;
