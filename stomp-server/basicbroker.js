@@ -221,5 +221,18 @@ function SendRecvCurry(broker) {
     };
 }
 
+var _re_x_header = /^x-/;
+var _pass_headers = ['reply-to', 'destination'];
+function filterHeaders(headers) {
+    var hdr_out = {};
+    for( var i in headers )
+        if( _pass_headers.indexOf(i) >= 0
+            || _re_x_header.test(i) )
+            hdr_out[i] = headers[i];
+
+    // Operation Complete!
+    return hdr_out;
+}
+
 // Export classes
 module.exports.BasicBroker = BasicBroker;
