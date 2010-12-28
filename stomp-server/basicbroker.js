@@ -4,7 +4,8 @@
 // Load modules
 var middleware          = require('./middleware'),
     Broker              = require('./broker').Broker,
-    Frame               = require('./frame').Frame;
+    Frame               = require('./frame').Frame,
+    sys                 = require('sys');
 
 // keep a table of subscriptions by regular expression
 // keep a table mapping destinations to subscriptions
@@ -25,6 +26,7 @@ function BasicBroker(bufferLimit) {
     // Install the automatic RECEIPT command middleware
     this._cf.recv_middleware.push({cbk: middleware.AutoReceiptRecv});
 }
+sys.inherits(BasicBroker, Broker);
 
 // NOTE: This routine aims to escape all regular expression characters *except*
 // for *

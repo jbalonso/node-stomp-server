@@ -4,7 +4,8 @@
 // Load modules
 var events          = require('events'),
     frame           = require('./frame'),
-    StringBuffer    = require('./stringbuffer').StringBuffer;
+    StringBuffer    = require('./stringbuffer').StringBuffer,
+    sys             = require('sys');
 
 function Connection( stream, bufferLimit ) {
     var self = this;
@@ -64,6 +65,7 @@ function Connection( stream, bufferLimit ) {
             };
         });
 }
+sys.inherits(Connection, events.EventEmitter);
 
 // Connection.send(frame_obj, cbk(err)
 Connection.prototype.send = function(frame_obj) {

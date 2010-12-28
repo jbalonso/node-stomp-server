@@ -5,7 +5,8 @@
 // Load modules
 var events      = require('events'),
     Connection  = require('./connection').Connection,
-    hashlib     = require('hashlib');
+    hashlib     = require('hashlib'),
+    sys         = require('sys');
 
 // Middleware structure: [{cbk: function(frame), ebk: function(frame)}...]
 // recv_middleware 
@@ -32,6 +33,7 @@ function ConnectionFactory(bufferLimit) {
         return self._newConnection(stream);
     };
 }
+sys.inherits(ConnectionFactory, events.EventEmitter);
 
 ConnectionFactory.prototype._newConnection = function() {
     var self = this;
