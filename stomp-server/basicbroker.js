@@ -205,7 +205,6 @@ function SendRecvCurry(broker) {
         // object
 
         // Push the message out to subscribers
-        var headers = filterHeaders(frame_obj.headers);
         for( var i in dst.subscriptions ) {
             var subscr = dst.subscriptions[i];
             var headers = filterHeaders(frame_obj.headers);
