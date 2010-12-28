@@ -86,7 +86,7 @@ function AutoReceiptRecv(conn, frame_obj) {
     return frame_obj;
 }
 
-// Export middlware
+// Export middleware
 module.exports.InvalidFrameError = InvalidFrameError;
 module.exports.ProtocolError = ProtocolError;
 module.exports.DefaultError = DefaultError;
