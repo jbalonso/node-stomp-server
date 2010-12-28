@@ -211,6 +211,8 @@ function SendRecvCurry(broker) {
 
             // Transmit a MESSAGE frame
             var frame_out = new Frame('MESSAGE', headers, frame_obj.body);
+            if( subscr.id )
+                frame_out.headers.id = subscr.id;
             broker._cf.send_frame(subscr.conn, frame_out);
         }
 
