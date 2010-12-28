@@ -3,7 +3,7 @@ var sys = require("sys"),
 
 var client = new stomp.Client("localhost", 61613);
 client.subscribe("/queue/news", function(data){
-  console.log('received: ' + data.body);
+  console.log('received: ' + JSON.stringify(data));
 });
 client.publish('/queue/news','hello');
 
