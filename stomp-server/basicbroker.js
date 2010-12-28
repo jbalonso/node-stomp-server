@@ -3,14 +3,14 @@
 
 // Load modules
 var middleware          = require('./middleware'),
-    Broker              = require('./broker').Broker;
-
+    Broker              = require('./broker').Broker,
+    Frame               = require('./frame').Frame;
 
 // keep a table of subscriptions by regular expression
 // keep a table mapping destinations to subscriptions
 function BasicBroker(bufferLimit) {
     // Extend Broker
-    Broker.call(this);
+    Broker.call(this, bufferLimit);
 
     // Initialize the subscription table
     this.subscriptions = [];
@@ -19,16 +19,46 @@ function BasicBroker(bufferLimit) {
     this.destinations = {};
 
     // Extend default middleware
+    this._cf.recv_middleware.push({cbk: SubscribeRecvCurry(this)});
+    this._cf.recv_middleware.push({cbk: SendRecvCurry(this)});
+
+    // Install the automatic RECEIPT command middleware
+    this._cf.recv_middleware.push({cbk: middleware.AutoReceiptRecv});
 }
 
-BasicBroker.prototype.subscribe = function(conn, pattern, id, ack) {
+// NOTE: This routine aims to escape all regular expression characters *except*
+// for *
+var escapeChars = /([\[\]\(\)\{\}\/\\\?\+\^\$\|\.\!])/;
+function escapePattern(str) {
+    return str.replace(escapeChars, '\\$1');
+}
+
+function patternFromDestination(destination) {
+    // Escape most characters
+    destination = escapePattern(destination);
+
+    // Escape stars
+    destination = destination.replace('.*', '.[^.]+');
+    destination = destination.replace('*', '\\*');
+
+    // Escape subtree references
+    destination = destination.replace('>', '(\\.[^.]+)+');
+
+    // Force complete string match
+    destination = '^' + destination + '$';
+
+    // Operation Complete!
+    return new RegExp(destination);
+}
+
+BasicBroker.prototype.subscribe = function(conn, destination, id, ack) {
     // Set defaults
     if( ack == null ) ack = 'auto';
 
     // Prepare the subscription structure
     var subscription = {
-        rex: new RegExp(pattern),
-        destination: pattern,
+        rex: patternFromDestination(destination),
+        destination: destination,
         id: id,
         conn: conn,
         ack: ack,
@@ -52,17 +82,37 @@ BasicBroker.prototype.subscribe = function(conn, pattern, id, ack) {
     // Operation Complete!
 };
 
-BasicBroker.prototype.unsubscribe = function(conn, pattern, id) {
+BasicBroker.prototype.getDestination = function(destination) {
+    // Return an existing destination if possible
+    if( destination in this.destinations )
+        return this.destinations[destination];
+
+    // Prepare a new destination structure
+    var dst = {subscriptions: []};
+
+    // Find matching subscriptions
+    for( var i in this.subscriptions )
+        if( this.subscriptions[i].rex.test(destination) )
+            dst.subscriptions.push(this.subscriptions[i]);
+
+    // Save the new destination
+    this.destinations[destination] = dst;
+
+    // Operation Complete!
+    return dst;
+};
+
+BasicBroker.prototype.unsubscribe = function(conn, destination, id) {
     // Make sure this subscription can be found
     var idx = -1;
     for( var i in this.subscriptions ) {
         if( conn != this.subscriptions[i].conn ) continue;
         if( id ) {
             if( id == this.subscriptions[i].id &&
-                ( ( pattern == null )
-                  || (pattern == this.subscriptions[i].destination)))
+                ( ( destination == null )
+                  || (destination == this.subscriptions[i].destination)))
                 idx = i;
-        } else if( ( this.subscriptions[i].destination == pattern )
+        } else if( ( this.subscriptions[i].destination == destination )
                    && ( this.subscriptions[i].id == id ) )
             idx = i;
     }
@@ -96,7 +146,76 @@ BasicBroker.prototype.unsubscribe = function(conn, pattern, id) {
 
 function SubscribeRecvCurry(broker) {
     return function(conn, frame_obj) {
-        
+        // Handle SUBSCRIBE and UNSUBSCRIBE
+        switch(frame_obj.cmd) {
+            case 'SUBSCRIBE':
+                // Extract requisite parameters
+                if( !frame_obj.headers.destination )
+                    throw new middleware.ProtocolError(conn, frame_obj, 'SUBSCRIBE requires a destination header');
+                var destination = frame_obj.headers.destination;
+                var id = frame_obj.headers.id;
+                var ack = frame_obj.headers.ack || 'auto';
+
+                // Subscribe
+                broker.subscribe(conn, destination, id, ack);
+
+                // Request is handled
+                frame_obj.handled = true;
+                break;
+
+            case 'UNSUBSCRIBE':
+                // Extract requisite parameters
+                if( !frame_obj.headers.destination && !frame_obj.headers.id )
+                    throw new middleware.ProtocolError(conn, frame_obj, 'UNSUBSCRIBE requires at least a destination or an id header');
+                var destination = frame_obj.headers.destination;
+                var id = frame_obj.headers.id;
+
+                // Unsubscribe
+                broker.unsubscribe(conn, destination, id);
+
+                // Request is handled
+                frame_obj.handled = true;
+                break;
+            default:
+        };
+
+        // Operation Complete!
+        return frame_obj;
+    };
+}
+
+function SendRecvCurry(broker) {
+    return function(conn, frame_obj) {
+        // Handle SEND
+        if( frame_obj.cmd != 'SEND' ) return frame_obj;
+
+        // Get the destination header
+        if( !frame_obj.headers.destination )
+            throw new middleware.ProtocolError(conn, frame_obj, 'SEND requires a destination header');
+        var destination = frame_obj.headers.destination;
+
+        // Obtain a destination object
+        // FIXME: There should be additional intelligence in constructing new
+        // destination objects
+        var dst = broker.getDestination(destination);
+
+        // FIXME: The following logic should be a method of the destination
+        // object
+
+        // Push the message out to subscribers
+        var headers = filterHeaders(frame_obj.headers);
+        for( var i in dst.subscriptions ) {
+            var subscr = dst.subscriptions[i];
+            var headers = filterHeaders(frame_obj.headers);
+
+            // Transmit a MESSAGE frame
+            var frame_out = new Frame('MESSAGE', headers, frame_obj.body);
+            broker._cf.send_frame(subscr.conn, frame_out);
+        }
+
+        // Operation Complete!
+        frame_obj.handled = true;
+        return frame_obj;
     };
 }
 
