@@ -78,7 +78,7 @@ function fromBuffer(buffer) {
             // Parse the header line
             var match = rex.exec(line);
             if( match == null )
-                throw new MalformedFrameError('Invalid header');
+                throw new MalformedFrameError('Invalid header: ' + line);
 
             // Save the header data
             headers[match[1]] = match[2];
