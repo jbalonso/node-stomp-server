@@ -89,6 +89,9 @@ ConnectionFactory.prototype._newConnection = function(stream) {
             if( frame_obj ) self.emit('frame', conn, frame_obj);
             else if( error_obj ) self.emit('error', error_obj);
         });
+
+    // Operation Complete!
+    return conn;
 };
 
 ConnectionFactory.prototype.send_frame = function(conn, frame_obj) {
