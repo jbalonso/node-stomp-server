@@ -28,6 +28,8 @@ var middleware          = require('./middleware'),
 // keep a table of subscriptions by regular expression
 // keep a table mapping destinations to subscriptions
 function BasicBroker(bufferLimit) {
+    var self = this;
+
     // Extend Broker
     Broker.call(this, bufferLimit);
 
@@ -43,6 +45,19 @@ function BasicBroker(bufferLimit) {
 
     // Install the automatic RECEIPT command middleware
     this._cf.recv_middleware.push({cbk: middleware.AutoReceiptRecv});
+
+    // Clean up subscriptions on connection close
+    var orig_newConnection = this.newConnection;
+    this.newConnection = function(stream) {
+        // Construct a connection
+        var conn = orig_newConnection(stream);
+
+        // Remove all connection subscriptions on close event
+        conn.on('close', function(had_error) { self.unsubscribe(conn); });
+
+        // Operation Complete!
+        return conn;
+    };
 }
 sys.inherits(BasicBroker, Broker);
 
@@ -134,6 +149,8 @@ BasicBroker.prototype.unsubscribe = function(conn, destination, id) {
                 idx = i;
         } else if( ( this.subscriptions[i].destination == destination )
                    && ( this.subscriptions[i].id == id ) )
+            idx = i;
+        else if( destination == null && id == null )
             idx = i;
     }
 
@@ -227,15 +244,14 @@ function SendRecvCurry(broker) {
             var subscr = dst.subscriptions[i];
             var headers = filterHeaders(frame_obj.headers);
 
-        // FIXME: This try/catch block patches the fact that subscriptions are
-        // not cleared for dropped/closed connections
-        try{
+            // FIXME: Errors should still be thrown, but attempts should be
+            // made on each subscription, regardless of errors on various attempts.
+
             // Transmit a MESSAGE frame
             var frame_out = new Frame('MESSAGE', headers, frame_obj.body);
             if( subscr.id )
                 frame_out.headers.id = subscr.id;
             broker._cf.send_frame(subscr.conn, frame_out);
-        }catch( err ) { console.log(err.stack); }
         }
 
         // Operation Complete!
