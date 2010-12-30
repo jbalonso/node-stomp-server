@@ -32,6 +32,7 @@ A simple STOMP server and a framework to build more advanced servers.
 * write unit tests
 * add server configuration support
 * make destinations first-class API objects
+* implement middleware for ActiveMQ-compatible destinations (queues, topics, tmp-queues, and tmp-topics)
 
 ## License
 GNU Affero Public License v3
