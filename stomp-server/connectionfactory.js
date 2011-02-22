@@ -23,7 +23,7 @@
 // Load modules
 var events      = require('events'),
     Connection  = require('./connection').Connection,
-    hashlib     = require('hashlib'),
+    sha1        = require('./hash')('sha1'),
     sys         = require('sys');
 
 // Middleware structure: [{cbk: function(frame), ebk: function(frame)}...]
@@ -40,7 +40,7 @@ function ConnectionFactory(bufferLimit) {
     this.bufferLimit = bufferLimit;
     this.recv_middleware = [];
     this.send_middleware = [];
-    this._seed = hashlib.sha1((new Date()) + process.pid + Math.random());
+    this._seed = sha1((new Date()) + process.pid + Math.random());
     this.conn_counter = 0;
 
     // Extend EventEmitter
@@ -60,7 +60,7 @@ ConnectionFactory.prototype._newConnection = function(stream) {
     var conn = new Connection(stream, this.bufferLimit);
 
     // Set the connection id
-    conn._id = hashlib.sha1(this._seed + this.conn_counter);
+    conn._id = sha1(this._seed + this.conn_counter, 'hex');
     this.conn_counter++;
 
     // Configure event handlers
