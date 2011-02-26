@@ -36,3 +36,6 @@ A simple STOMP server and a framework to build more advanced servers.
 
 ## License
 GNU Affero Public License v3
+
+<!-- vim:tw=75:formatoptions-=l:formatoptions-=v:syntax=mkd
+-->
