@@ -26,7 +26,24 @@ A simple STOMP server and a framework to build more advanced servers.
 
 ...matches /queue/a.b.c.d or /queue/a.b.anything.else.d but not /queue/a.b.d or /queue/a.b.d.c
 
-    
+## Concepts
+
+A Broker maintains the mapping between Subscriptions and Destinations,
+though a Destination is explicitly responsible for sending Frames to its
+Subscriptions. In particular, the Broker is responsible for extending
+existing Subscriptions to new Destinations and matching new Subscriptions
+to existing Destinations.
+
+A Server provides access to a Broker as a service by creating Connection
+objects and maintaining the mappings between Connections and Subscriptions.
+
+Middleware works on the Connection level by altering Frames going to or
+coming from the Broker. The Subscription and Destination classes may be
+subclassed to provide additional functionality, though specialized
+Middleware would be required to utilize them. Default Middlware exists, for
+example, to interpret SUBSCRIBE Frames and create Subscription and
+Destination objects as necessary.
+
 ## TODO
 * write API documentation
 * write unit tests
