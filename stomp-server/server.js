@@ -1,5 +1,5 @@
 
-// stomp-server/broker.js -- Definition of the Broker class
+// stomp-server/server.js -- Definition of the Server class
 
 /*  Copyright 2010, Jason B. Alonso
  *
@@ -24,7 +24,7 @@ var ConnectionFactory   = require('./connectionfactory').ConnectionFactory,
     frame               = require('./frame'),
     middleware          = require('./middleware');
 
-function Broker(bufferLimit) {
+function Server(bufferLimit) {
     var self = this;
 
     // Initialize members
@@ -44,4 +44,4 @@ function Broker(bufferLimit) {
 }
 
 // Export classes
-module.exports.Broker = Broker;
+module.exports.Server = Server;

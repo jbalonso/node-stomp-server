@@ -21,7 +21,7 @@
 
 // Load modules
 var middleware          = require('./middleware'),
-    Broker              = require('./broker').Broker,
+    Server              = require('./server').Server,
     Frame               = require('./frame').Frame,
     sys                 = require('sys');
 
@@ -30,8 +30,8 @@ var middleware          = require('./middleware'),
 function BasicBroker(bufferLimit) {
     var self = this;
 
-    // Extend Broker
-    Broker.call(this, bufferLimit);
+    // Extend Server
+    Server.call(this, bufferLimit);
 
     // Initialize the subscription table
     this.subscriptions = [];
@@ -59,7 +59,7 @@ function BasicBroker(bufferLimit) {
         return conn;
     };
 }
-sys.inherits(BasicBroker, Broker);
+sys.inherits(BasicBroker, Server);
 
 // NOTE: This routine aims to escape all regular expression characters *except*
 // for *
