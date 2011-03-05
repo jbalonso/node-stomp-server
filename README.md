@@ -45,6 +45,8 @@ example, to interpret SUBSCRIBE Frames and create Subscription and
 Destination objects as necessary.
 
 ## TODO
+* refactor Broker class not to inherit from Server class, and have Server
+class use an instance of the Broker class
 * write API documentation
 * write unit tests
 * add server configuration support
