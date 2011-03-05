@@ -18,12 +18,12 @@
  */
 
 // Load modules
-var BasicBroker     = require('./stomp-server/basicbroker').BasicBroker,
+var Broker          = require('./stomp-server/broker').Broker,
     middleware      = require('./stomp-server/middleware'),
     net             = require('net');
 
 // Build the broker object
-var broker = new BasicBroker(65536);
+var broker = new Broker(65536);
 broker._cf.recv_middleware.unshift({cbk: middleware.Debug});
 broker._cf.send_middleware.unshift({cbk: middleware.Debug});
 

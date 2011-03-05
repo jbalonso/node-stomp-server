@@ -1,5 +1,5 @@
 
-// stomp-server/basicbroker.js -- Definition of the BasicBroker class
+// stomp-server/basicbroker.js -- Definition of the Broker class
 
 /*  Copyright 2010, Jason B. Alonso
  *
@@ -27,7 +27,7 @@ var middleware          = require('./middleware'),
 
 // keep a table of subscriptions by regular expression
 // keep a table mapping destinations to subscriptions
-function BasicBroker(bufferLimit) {
+function Broker(bufferLimit) {
     var self = this;
 
     // Extend Server
@@ -59,7 +59,7 @@ function BasicBroker(bufferLimit) {
         return conn;
     };
 }
-sys.inherits(BasicBroker, Server);
+sys.inherits(Broker, Server);
 
 // NOTE: This routine aims to escape all regular expression characters *except*
 // for *
@@ -86,7 +86,7 @@ function patternFromDestination(destination) {
     return new RegExp(destination);
 }
 
-BasicBroker.prototype.subscribe = function(conn, destination, id, ack) {
+Broker.prototype.subscribe = function(conn, destination, id, ack) {
     // Set defaults
     if( ack == null ) ack = 'auto';
 
@@ -117,7 +117,7 @@ BasicBroker.prototype.subscribe = function(conn, destination, id, ack) {
     // Operation Complete!
 };
 
-BasicBroker.prototype.getDestination = function(destination) {
+Broker.prototype.getDestination = function(destination) {
     // Return an existing destination if possible
     if( destination in this.destinations )
         return this.destinations[destination];
@@ -137,7 +137,7 @@ BasicBroker.prototype.getDestination = function(destination) {
     return dst;
 };
 
-BasicBroker.prototype.unsubscribe = function(conn, destination, id) {
+Broker.prototype.unsubscribe = function(conn, destination, id) {
     // Make sure this subscription can be found
     var idx = -1;
     for( var i in this.subscriptions ) {
@@ -274,4 +274,4 @@ function filterHeaders(headers) {
 }
 
 // Export classes
-module.exports.BasicBroker = BasicBroker;
+module.exports.Broker = Broker;
