@@ -91,6 +91,11 @@ function ValidSendFrame(conn, frame_obj) {
     }
 }
 
+function TimestampFrame(conn, frame_obj) {
+    frame_obj.headers.timestamp = Number(new Date());
+    return frame_obj;
+}
+
 function ConnectRecv(conn, frame_obj) {
     // Make sure the client is connected
     if( !conn.connected ) {
@@ -129,4 +134,5 @@ module.exports.DefaultError = DefaultError;
 module.exports.ValidRecvFrame = ValidRecvFrame;
 module.exports.ValidSendFrame = ValidSendFrame;
 module.exports.ConnectRecv = ConnectRecv;
+module.exports.TimestampFrame = TimestampFrame;
 module.exports.Debug = Debug;
