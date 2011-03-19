@@ -74,10 +74,13 @@ Frame.prototype.toBuffer = function() {
 
 function fromBuffer(buffer) {
     // Extract command
-    var cmd = buffer.peekLine('\n');
-    if( cmd == null ) {
-        buffer.abortRead();
-        return null;
+    var cmd = '';
+    while( cmd == '' ) {
+        cmd = buffer.peekLine('\n');
+        if( cmd == null ) {
+            buffer.abortRead();
+            return null;
+        }
     }
 
     // Extract headers
