@@ -41,6 +41,7 @@ function BasicBroker(bufferLimit) {
 
     // Extend default middleware
     this._cf.recv_middleware.push({cbk: SubscribeRecvCurry(this)});
+    this._cf.recv_middleware.push({cbk: middleware.TimestampFrame});
     this._cf.recv_middleware.push({cbk: SendRecvCurry(this)});
 
     // Install the automatic RECEIPT command middleware
@@ -261,7 +262,7 @@ function SendRecvCurry(broker) {
 }
 
 var _re_x_header = /^x-/;
-var _pass_headers = ['reply-to', 'destination'];
+var _pass_headers = ['reply-to', 'destination', 'timestamp'];
 function filterHeaders(headers) {
     var hdr_out = {};
     for( var i in headers )
