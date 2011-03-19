@@ -68,6 +68,9 @@ Frame.prototype.toBuffer = function() {
     // End the frame
     buffer += "\0";
 
+    // Because no-one seems to agree on the spec
+    buffer += "\n";
+
     // Operation Complete!
     return buffer;
 };
